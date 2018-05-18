@@ -60,10 +60,12 @@ public final class ClassLoaderInstrumentation extends Instrumenter.Configurable 
           field.setAccessible(true);
 
           final Object o = field.get(null);
+          /*
           if (o instanceof DDTracer) {
             final DDTracer tracer = (DDTracer) o;
             tracer.registerClassLoader(cl);
           }
+          */
         } catch (final Throwable e) {
         }
       }
