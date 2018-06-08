@@ -1,13 +1,10 @@
 import akka.NotUsed
 import akka.stream.javadsl.Source
-import akka.stream.testkit.TestPublisher
 import akka.stream.testkit.javadsl.TestSink
-import com.lightbend.lagom.javadsl.testkit.ServiceTest
 import datadog.opentracing.DDSpan
 import org.junit.After
-import scala.concurrent.duration.FiniteDuration
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS
 import datadog.trace.agent.test.AgentTestRunner
 import play.inject.guice.GuiceApplicationBuilder
 import spock.lang.Shared
@@ -54,7 +51,7 @@ class LagomTest extends AgentTestRunner {
 
   def "normal request traces" () {
     setup:
-    EchoService service = server.client(EchoService.class)
+    EchoService service = server.client(EchoService)
 
     // Use a source that never terminates (concat Source.maybe) so we
     // don't close the upstream, which would close the downstream
@@ -91,7 +88,7 @@ class LagomTest extends AgentTestRunner {
 
   def "error traces" () {
     setup:
-    EchoService service = server.client(EchoService.class)
+    EchoService service = server.client(EchoService)
 
     // Use a source that never terminates (concat Source.maybe) so we
     // don't close the upstream, which would close the downstream
@@ -99,8 +96,7 @@ class LagomTest extends AgentTestRunner {
       Source.from(Arrays.asList("msg1", "msg2", "msg3"))
         .concat(Source.maybe())
     try {
-      Source<String, NotUsed> output = service.error().invoke(input)
-        .toCompletableFuture().get(5, SECONDS)
+      service.error().invoke(input).toCompletableFuture().get(5, SECONDS)
     } catch (Exception e) {
     }
 
