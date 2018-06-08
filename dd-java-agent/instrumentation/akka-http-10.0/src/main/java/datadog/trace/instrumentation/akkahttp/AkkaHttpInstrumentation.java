@@ -57,6 +57,7 @@ public final class AkkaHttpInstrumentation extends Instrumenter.Configurable {
         .type(named("akka.http.scaladsl.HttpExt"))
         .transform(DDTransformers.defaultTransformers())
         .transform(akkaHttpHelperInjector)
+        // TODO: bindAndHandleDoc
         .transform(
             DDAdvice.create()
                 .advice(
