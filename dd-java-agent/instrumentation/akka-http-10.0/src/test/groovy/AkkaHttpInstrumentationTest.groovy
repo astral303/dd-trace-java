@@ -6,18 +6,23 @@ import spock.lang.Shared
 
 class AkkaHttpInstrumentationTest extends AgentTestRunner {
   @Shared
-  int port
+  int asyncPort
+  @Shared
+  int syncPort
 
   def setupSpec() {
-    WebServer.start()
-    port = WebServer.port()
+    AkkaHttpTestAsyncWebServer.start()
+    asyncPort = AkkaHttpTestAsyncWebServer.port()
+    AkkaHttpTestSyncWebServer.start()
+    syncPort = AkkaHttpTestSyncWebServer.port()
   }
 
   def cleanupSpec() {
-    WebServer.stop()
+    AkkaHttpTestAsyncWebServer.stop()
+    AkkaHttpTestSyncWebServer.stop()
   }
 
-  def "200 request trace" () {
+  def "#server 200 request trace" () {
     setup:
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
@@ -35,9 +40,8 @@ class AkkaHttpInstrumentationTest extends AgentTestRunner {
 
     TEST_WRITER.size() == 1
     akkaTrace.size() == 2
-    akkaTrace[1].operationName == 'WebServer$.tracedMethod'
+    akkaTrace[1].operationName.endsWith('.tracedMethod')
     akkaTrace[1].parentId == akkaTrace[0].spanId
-
 
     root.traceId == 123
     root.parentId == 456
@@ -50,9 +54,14 @@ class AkkaHttpInstrumentationTest extends AgentTestRunner {
     root.context().tags["http.method"] == "GET"
     root.context().tags["span.kind"] == "server"
     root.context().tags["component"] == "akkahttp-action"
+
+    where:
+    server     | port
+    "async"    | asyncPort
+    "sync"     | syncPort
   }
 
-  def "exceptions trace for #endpoint" () {
+  def "#server exceptions trace for #endpoint" () {
     setup:
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
@@ -82,12 +91,14 @@ class AkkaHttpInstrumentationTest extends AgentTestRunner {
     root.context().tags["component"] == "akkahttp-action"
 
     where:
-    endpoint         | errorMessage
-    "throw-handler"  | "Oh no handler"
-    "throw-callback" | "Oh no callback"
+    server     | port       | endpoint         | errorMessage
+    "async"    | asyncPort  | "throw-handler"  | "Oh no handler"
+    "async"    | asyncPort  | "throw-callback" | "Oh no callback"
+    "sync"     | syncPort   | "throw-handler"  | "Oh no handler"
+    "sync"     | syncPort   | "throw-callback" | "Oh no callback"
   }
 
-  def "5xx trace" () {
+  def "#server 5xx trace" () {
     setup:
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
@@ -115,9 +126,14 @@ class AkkaHttpInstrumentationTest extends AgentTestRunner {
     root.context().tags["http.method"] == "GET"
     root.context().tags["span.kind"] == "server"
     root.context().tags["component"] == "akkahttp-action"
+
+    where:
+    server     | port
+    "async"    | asyncPort
+    "sync"     | syncPort
   }
 
-  def "4xx trace" () {
+  def "#server 4xx trace" () {
     setup:
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
@@ -145,6 +161,11 @@ class AkkaHttpInstrumentationTest extends AgentTestRunner {
     root.context().tags["http.method"] == "GET"
     root.context().tags["span.kind"] == "server"
     root.context().tags["component"] == "akkahttp-action"
+
+    where:
+    server     | port
+    "async"    | asyncPort
+    "sync"     | syncPort
   }
 }
 

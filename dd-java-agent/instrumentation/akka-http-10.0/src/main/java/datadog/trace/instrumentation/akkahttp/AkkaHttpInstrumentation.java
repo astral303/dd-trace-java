@@ -38,7 +38,6 @@ public final class AkkaHttpInstrumentation extends Instrumenter.Configurable {
     super("akkahttp");
   }
 
-  // TODO: sync vs async testing
   // TODO: Use test DSL
   // TODO: Merge into play testing
   // TODO: Disable Instrumentation by default
