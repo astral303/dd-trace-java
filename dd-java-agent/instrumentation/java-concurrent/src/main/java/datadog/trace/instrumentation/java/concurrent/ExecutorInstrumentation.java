@@ -81,9 +81,6 @@ public final class ExecutorInstrumentation extends Instrumenter.Configurable {
       "akka.dispatch.PinnedDispatcher",
       "akka.dispatch.ExecutionContexts$sameThreadExecutionContext$",
       "akka.dispatch.ExecutionContexts$sameThreadExecutionContext$",
-      // TODO: required? vv
-      "akka.testkit.CallingThreadDispatcher",
-      "play.shaded.ahc.io.netty.util.concurrent.GlobalEventExecutor",
       "play.api.libs.streams.Execution$trampoline$"
     };
     WHITELISTED_EXECUTORS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(whitelist)));
